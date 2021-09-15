@@ -70,7 +70,7 @@ class NNServer:
             else:
                 rep['content'] = f'Unknown cmd: {cmd}'
 
-            self._server.rep(req)
+            self._server.rep(rep)
 
 
 def load_wandb_model(model_cls, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
