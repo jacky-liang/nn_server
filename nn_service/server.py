@@ -75,12 +75,7 @@ class NNServer:
 
 def load_wandb_model(model_cls, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
     root_path = Path(cache_dir) / run_path
-
-    ckpt_file = wandb.restore(
-        checkpoint,
-        run_path=run_path,
-        root=root_path
-    )
+    ckpt_file = wandb.restore(checkpoint, run_path=run_path, root=root_path)
 
     model = model_cls.load_from_checkpoint(ckpt_file.name, **model_init_kwargs).cuda(gpu)
     model.train(False)
