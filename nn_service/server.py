@@ -48,7 +48,7 @@ class NNServer:
                     )
                     rep['success'] = True
                 except Exception as e:
-                    logging.error(e)
+                    logger.error(e)
                     rep['content'] = e.message
             elif cmd == 'query':
                 try:
@@ -65,7 +65,7 @@ class NNServer:
                     rep['content'] = np_dict_to_pa_dict(outputs_np, self._pyarrow_client)
                     rep['success'] = True
                 except Exception as e:
-                    logging.error(e)
+                    logger.error(e)
                     rep['content'] = e.message
             else:
                 rep['content'] = f'Unknown cmd: {cmd}'
