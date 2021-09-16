@@ -58,7 +58,7 @@ class NNServer:
                     model = self._models[model_name]
                     
                     inputs_np = pa_dict_to_np_dict(content['inputs'], self._pyarrow_client)
-                    inputs_th = {k: torch.from_numpy(v).to(model.device) for k, v in inputs_np.items()}
+                    inputs_th = {k: torch.from_numpy(v.copy()).to(model.device) for k, v in inputs_np.items()}
                     
                     outputs_th = model(inputs_th)
                     outputs_np = {k: v.cpu().numpy() for k, v in outputs_th.items()}
