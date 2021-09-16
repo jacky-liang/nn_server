@@ -34,12 +34,12 @@ class NNServer:
 
             if cmd == 'register':
                 try:
-                    model_cls_name = content['model_cls_name']
+                    model_name = content['model_name']
                     logger.info(f'Registering model: {content}')
 
-                    model_cls = self._model_classes[model_cls_name]
-                    self._models[model_cls_name] = load_wandb_model(
-                        model_cls, 
+                    model_class = self._model_classes[model_name]
+                    self._models[model_name] = load_wandb_model(
+                        model_class, 
                         content['cache_dir'],
                         content['run_path'],
                         content['checkpoint'],
@@ -52,10 +52,10 @@ class NNServer:
                     rep['content'] = str(e)
             elif cmd == 'query':
                 try:
-                    model_cls_name = content['model_cls_name']
-                    logger.info(f'Querying model {model_cls_name}')
+                    model_name = content['model_name']
+                    logger.info(f'Querying model {model_name}')
 
-                    model = self._models[model_cls_name]
+                    model = self._models[model_name]
                     
                     inputs_np = pa_dict_to_np_dict(content['inputs'], self._pyarrow_client)
                     inputs_th = {k: torch.from_numpy(v).to(model.device) for k, v in inputs_np.items()}
@@ -74,11 +74,11 @@ class NNServer:
             self._server.rep(rep)
 
 
-def load_wandb_model(model_cls, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
+def load_wandb_model(model_class, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
     root_path = Path(cache_dir) / run_path
     ckpt_file = wandb.restore(checkpoint, run_path=run_path, root=root_path)
 
-    model = model_cls.load_from_checkpoint(ckpt_file.name, **model_init_kwargs).cuda(gpu)
+    model = model_class.load_from_checkpoint(ckpt_file.name, **model_init_kwargs).cuda(gpu)
     model.train(False)
     
     return model

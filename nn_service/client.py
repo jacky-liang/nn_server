@@ -16,11 +16,11 @@ class NNClient:
         logger.info(f'Connecting to plasma on {plasma_path}')
         self._pyarrow_client = plasma.connect(plasma_path)
 
-    def register(self, model_cls_name, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
+    def register(self, model_name, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
         rep = self._client.send({
             'cmd': 'register',
             'content': {
-                'model_cls_name': model_cls_name,
+                'model_name': model_name,
                 'cache_dir': cache_dir,
                 'run_path': run_path,
                 'checkpoint': checkpoint,
@@ -33,11 +33,11 @@ class NNClient:
             return rep['content']
         raise Exception(rep['content'])
 
-    def query(self, model_cls_name, inputs_np):
+    def query(self, model_name, inputs_np):
         rep = self._client.send({
             'cmd': 'query',
             'content': {
-                'model_cls_name': model_cls_name,
+                'model_name': model_name,
                 'inputs': np_dict_to_pa_dict(inputs_np, self._pyarrow_client)
             }
         })
