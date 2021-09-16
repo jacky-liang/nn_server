@@ -11,18 +11,18 @@ logger = logging.getLogger(__name__)
 
 class NNServer:
 
-    def __init__(self, ip, port, pyarrow_path, model_classes):
+    def __init__(self, ip, port, plasma_path, model_classes):
         logger.info(f'Creating server on {ip}:{port}')
         self._server = SimpleZMQServer(ip, port)
 
-        logger.info(f'Connecting to plasma on {pyarrow_path}')
-        self._pyarrow_client = plasma.connect(pyarrow_path)
+        logger.info(f'Connecting to plasma on {plasma_path}')
+        self._pyarrow_client = plasma.connect(plasma_path)
 
         self._model_classes = model_classes
         self._models = {}
 
     def serve(self):
-        logger.info(f'Serving models: {self._model_classes.keys()}')
+        logger.info(f'Serving models: {list(self._model_classes.keys())}')
         while True:
             req = self._server.recv()
             cmd, content = req['cmd'], req['content']
@@ -35,21 +35,21 @@ class NNServer:
             if cmd == 'register':
                 try:
                     model_cls_name = content['model_cls_name']
-                    logger.info(f'Registering model {model_cls_name}')
+                    logger.info(f'Registering model: {content}')
 
                     model_cls = self._model_classes[model_cls_name]
                     self._models[model_cls_name] = load_wandb_model(
                         model_cls, 
-                        content['cache_dir'], 
-                        content['run_path'], 
-                        content['checkpoint'], 
+                        content['cache_dir'],
+                        content['run_path'],
+                        content['checkpoint'],
                         content['gpu'],
                         model_init_kwargs=content['model_init_kwargs']
                     )
                     rep['success'] = True
                 except Exception as e:
                     logger.error(e)
-                    rep['content'] = e.message
+                    rep['content'] = str(e)
             elif cmd == 'query':
                 try:
                     model_cls_name = content['model_cls_name']
@@ -70,6 +70,7 @@ class NNServer:
             else:
                 rep['content'] = f'Unknown cmd: {cmd}'
 
+            logger.info('Done')
             self._server.rep(rep)
 
 

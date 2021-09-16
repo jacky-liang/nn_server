@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 
 class NNClient:
 
-    def __init__(self, ip, port, pyarrow_path):
+    def __init__(self, ip, port, plasma_path):
         logger.info(f'Creating client on {ip}:{port}')
         self._client = SimpleZMQClient(ip, port)
 
-        logger.info(f'Connecting to plasma on {pyarrow_path}')
-        self._pyarrow_client = plasma.connect(pyarrow_path)
+        logger.info(f'Connecting to plasma on {plasma_path}')
+        self._pyarrow_client = plasma.connect(plasma_path)
 
     def register(self, model_cls_name, cache_dir, run_path, checkpoint, gpu, model_init_kwargs={}):
         rep = self._client.send({
