@@ -46,6 +46,7 @@ class NNServer:
                         content['gpu'],
                         model_init_kwargs=content['model_init_kwargs']
                     )
+                    
                     rep['success'] = True
                 except Exception as e:
                     logger.error(e)
@@ -60,13 +61,15 @@ class NNServer:
                     inputs_np = pa_dict_to_np_dict(content['inputs'], self._pyarrow_client)
                     inputs_th = {k: torch.from_numpy(v.copy()).to(model.device) for k, v in inputs_np.items()}
                     
-                    outputs_th = model(inputs_th)
-                    outputs_np = {k: v.cpu().numpy() for k, v in outputs_th.items()}
+                    with torch.inference_mode():
+                        outputs_th = model(inputs_th)
+                        outputs_np = {k: v.cpu().numpy() for k, v in outputs_th.items()}
+                    
                     rep['content'] = np_dict_to_pa_dict(outputs_np, self._pyarrow_client)
                     rep['success'] = True
                 except Exception as e:
                     logger.error(e)
-                    rep['content'] = e.message
+                    rep['content'] = str(e)
             else:
                 rep['content'] = f'Unknown cmd: {cmd}'
 
